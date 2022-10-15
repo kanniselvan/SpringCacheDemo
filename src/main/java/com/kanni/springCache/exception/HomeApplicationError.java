@@ -7,8 +7,8 @@ public class HomeApplicationError extends RuntimeException{
 
     private String  errorMessage;
 
-    public HomeApplicationError(String message,Throwable throwable){
-        super(message,throwable);
+    public HomeApplicationError(String message){
+        super(message);
         this.errorMessage=message;
     }
 }

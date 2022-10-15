@@ -10,11 +10,11 @@ import java.util.Calendar;
 
 @Data
 @Entity
-@Table(name = "Home_wages")
+@Table(name = "HomeWages")
 public class HomeWages {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-   // @Column(name = "id")
+    @Column(name = "wagesId")
     private int wagesId;
     @Column
     private String wagesType;

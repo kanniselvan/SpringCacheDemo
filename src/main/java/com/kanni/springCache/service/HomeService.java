@@ -7,7 +7,15 @@ import java.util.Optional;
 
 public interface HomeService {
 
-    List<HomeWages> getAllWages(Optional<Integer> wageId);
+    List<HomeWages> getAllWages();
 
-    boolean insertWages(List<HomeWages> homeWagesList);
+    List<HomeWages>  insertWages(List<HomeWages> homeWagesList);
+
+    List<HomeWages> updateWages(HomeWages homeWages,Integer wageId);
+
+    List<HomeWages> getHomeWageById(Integer wageId);
+
+    List<HomeWages> updateWagesAmount(Double amount, Integer wageId);
+
+    boolean deleteWages(Integer wageId);
 }

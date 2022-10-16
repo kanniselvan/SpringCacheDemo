@@ -6,6 +6,7 @@ import com.kanni.springCache.model.ResponseObject;
 import com.kanni.springCache.service.HomeService;
 import com.kanni.springCache.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class HomeController {
     @Autowired
     HomeService homeService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseObject getAllHomeWages(@RequestParam(value = "wageId" ,required = false) Optional<Integer> wageId){
         List<HomeWages> responseList=new ArrayList<>();
         if(wageId.isPresent())
@@ -31,7 +32,8 @@ public class HomeController {
          ResponseUtils.getResult(HomeWages.class,responseList): ResponseUtils.noDataFound();
     }
 
-    @PostMapping()
+    @PostMapping
+    @PreAuthorize("hasAuthority('Admin')")
     public ResponseObject insertHomeWages(@RequestBody List<HomeWages> homeWagesList){
         List<HomeWages> responseList=homeService.insertWages(homeWagesList);
         return Optional.ofNullable(responseList).isPresent()?

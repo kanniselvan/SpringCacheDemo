@@ -1,17 +1,16 @@
 package com.kanni.springCache.utils;
 
 import com.kanni.springCache.exception.HomeApplicationError;
-import com.kanni.springCache.filter.JwtTokenValidateFilter;
+import com.kanni.springCache.exception.JWTException;
 import com.kanni.springCache.model.JWTTokenInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 @Component
 public class JWTUtils {
 
-    private static final Logger LOGGER = LogManager.getLogger(JWTUtils.class);
+    private static final Logger LOGGER= LoggerFactory.getLogger(JWTUtils.class);
 
     @Value("${security.jwt.token.secret-key:secret-key}")
     private String secretKey;
@@ -48,22 +47,24 @@ public class JWTUtils {
     @Cacheable(cacheNames = "JWTTokenInfo",key = "#token")
     public JWTTokenInfo getTokenInfo(String token) {
         LOGGER.info("Create entry in Cache.....");
-        Jws<Claims> claims=Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-        if(ObjectUtils.isNotEmpty(claims) && ObjectUtils.isNotEmpty(claims.getBody())) {
-            String userName = getUserName(claims.getBody());
-            String issuer = claims.getBody().getIssuer();
-            String role = claims.getBody().get("Role").toString();
-            String email = String.valueOf(claims.getBody().get("Email"));
-            Date expiry = claims.getBody().getExpiration();
-            JWTTokenInfo jwtTokenInfo = new JWTTokenInfo();
-            jwtTokenInfo.setUserName(userName);
-            jwtTokenInfo.setIssuer(issuer);
-            jwtTokenInfo.setExpiryDate(expiry);
-            jwtTokenInfo.setRole(role);
-            jwtTokenInfo.setEmail(email);
-            return jwtTokenInfo;
+        if (StringUtils.isNotBlank(token)) {
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            if (ObjectUtils.isNotEmpty(claims) && ObjectUtils.isNotEmpty(claims.getBody())) {
+                String userName = getUserName(claims.getBody());
+                String issuer = claims.getBody().getIssuer();
+                String role = claims.getBody().get("Role").toString();
+                String email = String.valueOf(claims.getBody().get("Email"));
+                Date expiry = claims.getBody().getExpiration();
+                JWTTokenInfo jwtTokenInfo = new JWTTokenInfo();
+                jwtTokenInfo.setUserName(userName);
+                jwtTokenInfo.setIssuer(issuer);
+                jwtTokenInfo.setExpiryDate(expiry);
+                jwtTokenInfo.setRole(role);
+                jwtTokenInfo.setEmail(email);
+                return jwtTokenInfo;
+            }
         }
-        return null;
+        throw new JWTException("Token should not be null!!!!");
     }
 
 
@@ -92,6 +93,14 @@ public class JWTUtils {
         User principal = new User(getUserName(claims), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+    }
+
+    public JWTTokenInfo getJWTTokenInfo(HttpServletRequest req){
+        String token=resolveToken(req);
+        if(StringUtils.isNotBlank(token)){
+            return getTokenInfo(token);
+        }
+        return null;
     }
 
     public String resolveToken(HttpServletRequest req) {

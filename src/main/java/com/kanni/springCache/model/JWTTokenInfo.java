@@ -12,7 +12,7 @@ public class JWTTokenInfo {
 
     private String userName;
 
-    private String role;
+  //  private String role;
 
     private Date expiryDate;
 

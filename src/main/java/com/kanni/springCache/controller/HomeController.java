@@ -44,7 +44,7 @@ public class HomeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('Admin')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseObject insertHomeWages(@RequestBody List<HomeWages> homeWagesList , HttpServletRequest request){
         List<HomeWages> responseList=homeService.insertWages(homeWagesList);
         LOGGER.info("Token : {}",jwtUtils.getTokenInfo(jwtUtils.resolveToken(request)));
